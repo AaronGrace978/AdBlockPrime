@@ -1,0 +1,16 @@
+{
+  "name": "adblockprime",
+  "version": "2.0.0",
+  "description": "AI-powered stealth ad blocker for Chrome, Firefox, and more",
+  "scripts": {
+    "build:chrome": "node build.js chrome",
+    "build:firefox": "node build.js firefox",
+    "build:all": "node build.js chrome; node build.js firefox",
+    "package:chrome": "node build.js chrome; node package.js chrome",
+    "package:firefox": "node build.js firefox; node package.js firefox",
+    "package:all": "node build.js chrome; node build.js firefox; node package.js chrome; node package.js firefox",
+    "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\""
+  },
+  "author": "AdBlockPrime",
+  "license": "MIT"
+}

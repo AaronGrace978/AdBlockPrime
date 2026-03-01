@@ -1,0 +1,103 @@
+{
+  "manifest_version": 3,
+  "name": "AdBlockPrime",
+  "version": "2.0.0",
+  "description": "AI-powered stealth ad blocker. Blocks ads, trackers, and anti-adblock scripts undetectably.",
+  "author": "AdBlockPrime",
+
+  "permissions": [
+    "storage",
+    "activeTab",
+    "tabs",
+    "declarativeNetRequest",
+    "declarativeNetRequestFeedback"
+  ],
+
+  "host_permissions": [
+    "<all_urls>"
+  ],
+
+  "background": {
+    "service_worker": "src/background/service-worker.js"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": [
+        "src/content/prerender.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": true
+    },
+    {
+      "matches": ["<all_urls>"],
+      "js": [
+        "src/content/prerender-main.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": true,
+      "world": "MAIN"
+    },
+    {
+      "matches": [
+        "*://*.youtube.com/*",
+        "*://youtube.com/*",
+        "*://m.youtube.com/*"
+      ],
+      "js": [
+        "src/content/youtube.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": true
+    },
+    {
+      "matches": ["<all_urls>"],
+      "js": [
+        "src/ai/engine.js",
+        "src/content/stealth.js",
+        "src/content/cosmetic-filter.js",
+        "src/content/element-detector.js",
+        "src/content/site-modules.js",
+        "src/content/content-script.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ],
+
+  "action": {
+    "default_popup": "src/popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    },
+    "default_title": "AdBlockPrime"
+  },
+
+  "options_page": "src/options/options.html",
+
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "network_rules",
+        "enabled": true,
+        "path": "src/rules/network-rules.json"
+      }
+    ]
+  },
+
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+
+  "web_accessible_resources": [
+    {
+      "resources": ["src/ai/engine.js", "src/ai/ollama-client.js", "src/ai/agent.js", "src/content/prerender-main.js"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

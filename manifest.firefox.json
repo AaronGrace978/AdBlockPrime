@@ -1,0 +1,97 @@
+{
+  "manifest_version": 2,
+  "name": "AdBlockPrime",
+  "version": "2.0.0",
+  "description": "AI-powered stealth ad blocker. Blocks ads, trackers, and anti-adblock scripts undetectably.",
+  "author": "AdBlockPrime",
+
+  "permissions": [
+    "storage",
+    "activeTab",
+    "tabs",
+    "webRequest",
+    "webRequestBlocking",
+    "<all_urls>"
+  ],
+
+  "background": {
+    "scripts": [
+      "src/ai/engine.js",
+      "src/ai/network-analyzer.js",
+      "src/ai/ollama-client.js",
+      "src/ai/agent.js",
+      "src/background/service-worker-firefox.js"
+    ]
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": [
+        "src/content/prerender.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": true
+    },
+    {
+      "matches": [
+        "*://*.youtube.com/*",
+        "*://youtube.com/*",
+        "*://m.youtube.com/*"
+      ],
+      "js": [
+        "src/content/youtube.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": true
+    },
+    {
+      "matches": ["<all_urls>"],
+      "js": [
+        "src/ai/engine.js",
+        "src/content/stealth.js",
+        "src/content/cosmetic-filter.js",
+        "src/content/element-detector.js",
+        "src/content/site-modules.js",
+        "src/content/content-script-firefox.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ],
+
+  "browser_action": {
+    "default_popup": "src/popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    },
+    "default_title": "AdBlockPrime"
+  },
+
+  "options_ui": {
+    "page": "src/options/options.html",
+    "open_in_tab": true
+  },
+
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+
+  "web_accessible_resources": [
+    "src/ai/engine.js",
+    "src/ai/ollama-client.js",
+    "src/ai/agent.js",
+    "src/content/prerender-main.js"
+  ],
+
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "adblockprime@example.com",
+      "strict_min_version": "109.0"
+    }
+  }
+}
