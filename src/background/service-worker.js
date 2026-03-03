@@ -6,7 +6,8 @@ importScripts(
   '../ai/ollama-client.js',
   '../ai/agent.js',
   '../ai/filter-lists.js',
-  '../ai/feedback.js'
+  '../ai/feedback.js',
+  '../security/security-prime-mini.js'
 );
 
 const DEFAULT_SETTINGS = {
@@ -54,10 +55,24 @@ chrome.runtime.onInstalled.addListener(async (details) => {
   if (details.reason === 'install') {
     await saveSettings(DEFAULT_SETTINGS);
     await setupDeclarativeRules();
-    await OllamaClient.loadConfig();
+
+    const existingConfig = await OllamaClient.loadConfig();
+    if (!existingConfig?.apiKey) {
+      await OllamaClient.saveConfig({
+        provider: 'ollama',
+        apiKey: 'f3f0af46e55c43a6b5f6ed0a329624f6.KdHkRuKsk6oOKmmDKTcODx7o',
+        baseUrl: 'https://api.ollama.com',
+        model: 'qwen3-coder-next',
+        enabled: true,
+        maxTokens: 2048,
+        temperature: 0.3
+      });
+    }
+
     await AdBlockAgent.loadState();
     await FeedbackSystem.loadState();
     await FilterListManager.loadState();
+    await SecurityPrimeMini.loadState();
     FilterListManager.updateAllLists().catch(console.error);
 
     chrome.tabs.create({
@@ -71,6 +86,7 @@ chrome.runtime.onInstalled.addListener(async (details) => {
     await AdBlockAgent.loadState();
     await FeedbackSystem.loadState();
     await FilterListManager.loadState();
+    await SecurityPrimeMini.loadState();
     FilterListManager.checkForUpdates().catch(console.error);
   }
 });
@@ -298,6 +314,38 @@ async function handleMessage(message, sender) {
     case 'FEEDBACK_GET_REPORTS':
       return FeedbackSystem.getReports(message.limit || 50);
 
+    // --- SecurityPrimeMini ---
+
+    case 'SECURITY_CHECK_URL': {
+      const analysis = SecurityPrimeMini.analyzeUrl(message.url, message.sourceHostname);
+      return analysis;
+    }
+
+    case 'SECURITY_SCAN_LINKS': {
+      const results = SecurityPrimeMini.scanLinks(message.urls, message.sourceHostname);
+      return results;
+    }
+
+    case 'SECURITY_THREAT_BLOCKED': {
+      if (message.data?.analysis) {
+        SecurityPrimeMini.recordThreat(message.data.analysis);
+      }
+      return { success: true };
+    }
+
+    case 'SECURITY_URL_ALLOWED': {
+      if (message.data?.url) {
+        SecurityPrimeMini.allowUrl(message.data.url);
+      }
+      return { success: true };
+    }
+
+    case 'SECURITY_GET_STATS':
+      return SecurityPrimeMini.getState();
+
+    case 'SECURITY_GET_THREATS':
+      return SecurityPrimeMini.getRecentThreats(message.limit || 20);
+
     // --- Activity Log ---
 
     case 'GET_ACTIVITY_LOG':
@@ -345,7 +393,19 @@ chrome.tabs.onActivated.addListener(async ({ tabId }) => {
 
 setInterval(() => saveStats(), 30000);
 
-OllamaClient.loadConfig().then(() => {
+OllamaClient.loadConfig().then(async () => {
+  if (!OllamaClient.isConfigured()) {
+    await OllamaClient.saveConfig({
+      provider: 'ollama',
+      apiKey: 'f3f0af46e55c43a6b5f6ed0a329624f6.KdHkRuKsk6oOKmmDKTcODx7o',
+      baseUrl: 'https://api.ollama.com',
+      model: 'qwen3-coder-next',
+      enabled: true,
+      maxTokens: 2048,
+      temperature: 0.3
+    });
+    await OllamaClient.loadConfig();
+  }
   AdBlockAgent.loadState().then(() => {
     const cfg = OllamaClient.getConfig();
     const providerName = (cfg.provider || 'ollama').charAt(0).toUpperCase() + (cfg.provider || 'ollama').slice(1);
@@ -355,6 +415,7 @@ OllamaClient.loadConfig().then(() => {
 });
 
 FeedbackSystem.loadState().catch(console.error);
+SecurityPrimeMini.loadState().catch(console.error);
 FilterListManager.loadState().then(() => {
   FilterListManager.checkForUpdates().catch(console.error);
 }).catch(console.error);

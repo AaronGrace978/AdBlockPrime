@@ -56,6 +56,15 @@
     ElementDetector.init();
   }
 
+  if (typeof LinkGuard !== 'undefined') {
+    const initLinkGuard = () => LinkGuard.init();
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initLinkGuard);
+    } else {
+      initLinkGuard();
+    }
+  }
+
   if (settings.aiAgent && !isYouTube) {
     scheduleProactiveAgentScan();
   }
@@ -64,6 +73,10 @@
     switch (message.type) {
       case 'GET_PAGE_STATS':
         sendResponse(ElementDetector.getStats());
+        break;
+
+      case 'GET_SECURITY_PAGE_STATS':
+        sendResponse(typeof LinkGuard !== 'undefined' ? LinkGuard.getStats() : { scanned: 0, blocked: 0, warned: 0 });
         break;
 
       case 'RESCAN_PAGE':

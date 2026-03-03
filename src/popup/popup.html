@@ -152,6 +152,32 @@
       </button>
     </section>
 
+    <section class="security-panel" id="security-panel">
+      <div class="security-header">
+        <div class="security-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span>SecurityPrime<strong style="color:#FF5370;">Mini</strong></span>
+          <span class="security-status" id="security-status">Active</span>
+        </div>
+        <label class="toggle small">
+          <input type="checkbox" id="toggle-security" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="security-body" id="security-body">
+        <div class="agent-stats-row">
+          <div class="agent-stat security-stat">
+            <span class="agent-stat-num" id="security-scanned">0</span>
+            <span class="agent-stat-lbl">Links Scanned</span>
+          </div>
+          <div class="agent-stat security-stat">
+            <span class="agent-stat-num" id="security-threats">0</span>
+            <span class="agent-stat-lbl">Threats Blocked</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section class="activity-log" id="activity-section">
       <div class="activity-header" id="activity-toggle">
         <div class="activity-title">

@@ -59,6 +59,7 @@
         "src/content/cosmetic-filter.js",
         "src/content/element-detector.js",
         "src/content/site-modules.js",
+        "src/content/link-guard.js",
         "src/content/content-script.js"
       ],
       "run_at": "document_start",

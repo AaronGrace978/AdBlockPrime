@@ -197,6 +197,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (!isConfigured) {
         agentStatus.textContent = 'Setup Needed';
         agentStatus.className = 'agent-status unconfigured';
+        agentStatus.style.cursor = 'pointer';
+        agentStatus.title = 'Click to configure AI Agent';
+        agentStatus.onclick = () => chrome.runtime.openOptionsPage();
         btnAgentScan.disabled = true;
       } else {
         agentStatus.textContent = providerLabel;
@@ -267,6 +270,46 @@ document.addEventListener('DOMContentLoaded', async () => {
     btnAgentScan.classList.remove('scanning');
     btnAgentScan.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> Deep Scan Page`;
   });
+
+  // --- SecurityPrimeMini ---
+
+  const toggleSecurity = document.getElementById('toggle-security');
+  const securityPanel = document.getElementById('security-panel');
+  const securityStatus = document.getElementById('security-status');
+  const securityScanned = document.getElementById('security-scanned');
+  const securityThreats = document.getElementById('security-threats');
+
+  async function loadSecurityState() {
+    try {
+      const globalStats = await chrome.runtime.sendMessage({ type: 'SECURITY_GET_STATS' });
+      if (globalStats) {
+        animateNumber(securityThreats, globalStats.threatsBlocked || 0);
+        animateNumber(securityScanned, globalStats.linksScanned || 0);
+      }
+
+      try {
+        const pageStats = await chrome.tabs.sendMessage(currentTab.id, { type: 'GET_SECURITY_PAGE_STATS' });
+        if (pageStats) {
+          animateNumber(securityScanned, pageStats.scanned || 0);
+        }
+      } catch {}
+
+      securityStatus.textContent = 'Active';
+      securityStatus.className = 'security-status';
+    } catch {}
+  }
+
+  toggleSecurity.addEventListener('change', () => {
+    if (toggleSecurity.checked) {
+      securityPanel.classList.remove('disabled');
+      securityStatus.textContent = 'Active';
+    } else {
+      securityPanel.classList.add('disabled');
+      securityStatus.textContent = 'Off';
+    }
+  });
+
+  loadSecurityState();
 
   // --- Activity Log ---
 
