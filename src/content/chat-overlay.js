@@ -187,6 +187,10 @@ const ChatOverlay = (() => {
         <div class="prime-pw-key-row">
           <input type="text" class="prime-pw-key-input" id="prime-pw-key"
             placeholder="ABP-XXXX-XXXX-XXXX" maxlength="19" autocomplete="off" />
+        </div>
+        <div class="prime-pw-key-row" style="margin-top:8px !important;">
+          <input type="password" class="prime-pw-key-input" id="prime-pw-pass"
+            placeholder="Password" autocomplete="off" style="letter-spacing:2px !important; text-transform:none !important; font-family:inherit !important;" />
           <button class="prime-pw-activate" id="prime-pw-activate">Activate</button>
         </div>
         <div class="prime-pw-msg" id="prime-pw-msg"></div>
@@ -201,6 +205,9 @@ const ChatOverlay = (() => {
     });
     document.getElementById('prime-pw-activate').addEventListener('click', activateKey);
     document.getElementById('prime-pw-key').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('prime-pw-pass').focus();
+    });
+    document.getElementById('prime-pw-pass').addEventListener('keydown', (e) => {
       if (e.key === 'Enter') activateKey();
     });
   }
@@ -211,14 +218,17 @@ const ChatOverlay = (() => {
 
   async function activateKey() {
     const keyInput = document.getElementById('prime-pw-key');
+    const passInput = document.getElementById('prime-pw-pass');
     const msgEl = document.getElementById('prime-pw-msg');
-    if (!keyInput || !msgEl) return;
+    if (!keyInput || !passInput || !msgEl) return;
 
     const key = keyInput.value.trim();
+    const password = passInput.value.trim();
     if (!key) { msgEl.textContent = 'Enter your license key'; msgEl.style.color = '#FF5370'; return; }
+    if (!password) { msgEl.textContent = 'Enter password'; msgEl.style.color = '#FF5370'; return; }
 
     try {
-      const result = await chrome.runtime.sendMessage({ type: 'PREMIUM_ACTIVATE', key });
+      const result = await chrome.runtime.sendMessage({ type: 'PREMIUM_ACTIVATE', key, password });
       if (result?.success) {
         msgEl.textContent = result.message || 'Premium activated!';
         msgEl.style.color = '#00D2A0';
@@ -231,10 +241,11 @@ const ChatOverlay = (() => {
           setTimeout(() => input?.focus(), 100);
         }, 1200);
       } else {
-        msgEl.textContent = result?.error || 'Invalid key';
+        msgEl.textContent = result?.error || 'Invalid key or password';
         msgEl.style.color = '#FF5370';
         keyInput.style.borderColor = '#FF5370';
-        setTimeout(() => { keyInput.style.borderColor = ''; }, 2000);
+        passInput.style.borderColor = '#FF5370';
+        setTimeout(() => { keyInput.style.borderColor = ''; passInput.style.borderColor = ''; }, 2000);
       }
     } catch (err) {
       msgEl.textContent = 'Activation failed. Try again.';

@@ -358,7 +358,7 @@ async function handleMessage(message, sender) {
       return PremiumGate.getState();
 
     case 'PREMIUM_ACTIVATE': {
-      const activateResult = await PremiumGate.activateKey(message.key);
+      const activateResult = await PremiumGate.activateKey(message.key, message.password);
       return activateResult;
     }
 
