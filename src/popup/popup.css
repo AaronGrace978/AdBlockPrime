@@ -509,6 +509,89 @@ body {
   pointer-events: none;
 }
 
+/* Prime Chat Launch */
+.prime-chat-launch {
+  display: flex;
+}
+
+.btn-prime-chat {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  background: linear-gradient(135deg, var(--accent), var(--accent-light));
+  color: white;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 12px var(--accent-glow);
+}
+
+.btn-prime-chat:hover {
+  opacity: 0.9;
+  box-shadow: 0 4px 20px rgba(108, 92, 231, 0.4);
+  transform: translateY(-1px);
+}
+
+.prime-chat-badge {
+  font-size: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  background: rgba(255,255,255,0.2);
+  padding: 2px 6px;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.prime-chat-badge.premium-active {
+  background: rgba(0, 210, 160, 0.25);
+  color: #00D2A0;
+}
+
+/* Premium status row */
+.premium-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  justify-content: center;
+}
+
+.premium-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.premium-dot.active {
+  background: var(--success);
+  box-shadow: 0 0 6px rgba(0, 210, 160, 0.5);
+}
+
+.premium-dot.trial {
+  background: #F59E0B;
+  box-shadow: 0 0 6px rgba(245, 158, 11, 0.4);
+}
+
+.premium-dot.locked {
+  background: var(--accent-light);
+  box-shadow: 0 0 6px rgba(168, 85, 247, 0.4);
+}
+
+.premium-label {
+  font-size: 10px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
 /* SecurityPrimeMini Panel */
 .security-panel {
   background: var(--surface);

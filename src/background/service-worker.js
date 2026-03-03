@@ -7,7 +7,9 @@ importScripts(
   '../ai/agent.js',
   '../ai/filter-lists.js',
   '../ai/feedback.js',
-  '../security/security-prime-mini.js'
+  '../security/security-prime-mini.js',
+  '../chat/prime-companion.js',
+  '../premium/premium.js'
 );
 
 const DEFAULT_SETTINGS = {
@@ -73,6 +75,8 @@ chrome.runtime.onInstalled.addListener(async (details) => {
     await FeedbackSystem.loadState();
     await FilterListManager.loadState();
     await SecurityPrimeMini.loadState();
+    await PrimeCompanion.loadState();
+    await PremiumGate.loadState();
     FilterListManager.updateAllLists().catch(console.error);
 
     chrome.tabs.create({
@@ -87,6 +91,8 @@ chrome.runtime.onInstalled.addListener(async (details) => {
     await FeedbackSystem.loadState();
     await FilterListManager.loadState();
     await SecurityPrimeMini.loadState();
+    await PrimeCompanion.loadState();
+    await PremiumGate.loadState();
     FilterListManager.checkForUpdates().catch(console.error);
   }
 });
@@ -346,6 +352,51 @@ async function handleMessage(message, sender) {
     case 'SECURITY_GET_THREATS':
       return SecurityPrimeMini.getRecentThreats(message.limit || 20);
 
+    // --- Premium ---
+
+    case 'PREMIUM_GET_STATE':
+      return PremiumGate.getState();
+
+    case 'PREMIUM_ACTIVATE': {
+      const activateResult = await PremiumGate.activateKey(message.key);
+      return activateResult;
+    }
+
+    case 'PREMIUM_DEACTIVATE':
+      return await PremiumGate.deactivate();
+
+    // --- Prime Companion Chat (Premium) ---
+
+    case 'PRIME_CHAT': {
+      if (!PremiumGate.canSendMessage()) {
+        return {
+          error: 'paywall',
+          ...PremiumGate.getState()
+        };
+      }
+      await PremiumGate.useTrialMessage();
+      const result = await PrimeCompanion.chat(message.message, message.visionContext);
+      result.premium = PremiumGate.getState();
+      return result;
+    }
+
+    case 'PRIME_CLEAR':
+      PrimeCompanion.clearConversation();
+      return { success: true };
+
+    case 'PRIME_GET_CONVO':
+      return { messages: PrimeCompanion.getConversation() };
+
+    case 'PRIME_GET_SOUL':
+      return PrimeCompanion.getSoulFrame();
+
+    case 'PRIME_GET_NIGHTMIND':
+      return PrimeCompanion.getNightMind();
+
+    case 'PRIME_SET_NAME':
+      PrimeCompanion.setUserName(message.name);
+      return { success: true };
+
     // --- Activity Log ---
 
     case 'GET_ACTIVITY_LOG':
@@ -416,6 +467,8 @@ OllamaClient.loadConfig().then(async () => {
 
 FeedbackSystem.loadState().catch(console.error);
 SecurityPrimeMini.loadState().catch(console.error);
+PrimeCompanion.loadState().catch(console.error);
+PremiumGate.loadState().catch(console.error);
 FilterListManager.loadState().then(() => {
   FilterListManager.checkForUpdates().catch(console.error);
 }).catch(console.error);

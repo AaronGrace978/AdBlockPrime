@@ -181,6 +181,45 @@ document.addEventListener('DOMContentLoaded', async () => {
     chrome.runtime.openOptionsPage();
   });
 
+  // --- Prime Chat + Premium ---
+
+  const btnPrimeChat = document.getElementById('btn-prime-chat');
+  const premiumStatusEl = document.getElementById('premium-status');
+  const premiumDot = document.getElementById('premium-dot');
+  const premiumLabel = document.getElementById('premium-label');
+  const primeChatBadge = document.getElementById('prime-chat-badge');
+
+  async function loadPremiumState() {
+    try {
+      const ps = await chrome.runtime.sendMessage({ type: 'PREMIUM_GET_STATE' });
+      premiumStatusEl.style.display = 'flex';
+      if (ps?.isPremium) {
+        premiumDot.className = 'premium-dot active';
+        premiumLabel.textContent = 'Premium Active';
+        primeChatBadge.textContent = 'Premium';
+        primeChatBadge.classList.add('premium-active');
+      } else if (ps?.trialRemaining > 0) {
+        premiumDot.className = 'premium-dot trial';
+        premiumLabel.textContent = `${ps.trialRemaining} free message${ps.trialRemaining === 1 ? '' : 's'} left`;
+      } else {
+        premiumDot.className = 'premium-dot locked';
+        premiumLabel.textContent = 'Premium — $0.77';
+      }
+    } catch {}
+  }
+
+  loadPremiumState();
+
+  btnPrimeChat.addEventListener('click', async () => {
+    if (!currentTab?.id) return;
+    try {
+      await chrome.tabs.sendMessage(currentTab.id, { type: 'TOGGLE_PRIME_CHAT' });
+      window.close();
+    } catch {
+      console.error('Could not open Prime chat');
+    }
+  });
+
   // --- AI Agent ---
 
   const PROVIDER_NAMES = { ollama: 'Ollama', openai: 'OpenAI', anthropic: 'Anthropic', mistral: 'Mistral' };

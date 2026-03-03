@@ -65,6 +65,18 @@
     }
   }
 
+  // Prime Companion chat overlay (only in top frame)
+  if (typeof ChatOverlay !== 'undefined' && window === window.top) {
+    const initChat = () => {
+      try { ChatOverlay.init(); } catch (e) { console.error('[AdBlockPrime] Chat init error:', e); }
+    };
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      initChat();
+    } else {
+      document.addEventListener('DOMContentLoaded', initChat);
+    }
+  }
+
   if (settings.aiAgent && !isYouTube) {
     scheduleProactiveAgentScan();
   }
@@ -93,6 +105,15 @@
       case 'TOGGLE_ELEMENT_PICKER':
         startElementPicker();
         sendResponse({ success: true });
+        break;
+
+      case 'TOGGLE_PRIME_CHAT':
+        if (typeof ChatOverlay !== 'undefined') {
+          ChatOverlay.toggle();
+          sendResponse({ success: true });
+        } else {
+          sendResponse({ error: 'Chat not available' });
+        }
         break;
 
       case 'AGENT_SCAN':
